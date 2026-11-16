@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wanderpedia – a better way to read Wikipedia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ee;--card:#fffdf9;--ink:#23201c;--mute:#7a736a;--accent:#b4452c;--line:#e6dfd3;--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(60,40,20,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#15130f;--card:#1e1b16;--ink:#ece6da;--mute:#9a9183;--accent:#e8805f;--line:#332e26;--shadow:0 8px 24px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.75 'Lora',Georgia,serif}
+.ui{font-family:'Inter',system-ui,sans-serif}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:30}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hin{max-width:900px;margin:auto;display:flex;gap:10px;align-items:center;padding:12px 18px}
+.logo{font-weight:600;font-size:17px;white-space:nowrap;cursor:pointer}.logo b{color:var(--accent)}
+.sw{position:relative;flex:1}
+input{width:100%;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:15px 'Inter',sans-serif;outline:none}
+input:focus{border-color:var(--accent)}
+button{font:600 14px 'Inter',sans-serif;border:0;border-radius:999px;padding:10px 16px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
+button:hover{filter:brightness(1.08)}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+#sug{position:absolute;top:46px;left:0;right:0;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;display:none}
+#sug a{display:block;padding:10px 16px;font:14px/1.4 'Inter',sans-serif;cursor:pointer;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+#sug a:last-child{border:0}#sug a:hover{background:var(--bg)}
+#sug small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+main{max-width:760px;margin:auto;padding:0 18px 80px}
+.hero{margin:28px -18px 0;border-radius:22px;overflow:hidden;position:relative;min-height:260px;background:linear-gradient(135deg,#b4452c,#3b2a6b);color:#fff;display:flex;align-items:flex-end;box-shadow:var(--shadow)}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,5,.88),rgba(10,8,5,.1) 70%)}
+.hero div{position:relative;z-index:2;padding:28px}
+.kick{font:600 12px 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+h1{font-size:clamp(30px,6vw,48px);line-height:1.1;margin:8px 0;font-weight:600}
+.desc{font-style:italic;opacity:.92;margin:0}
+.meta{margin:18px 2px;color:var(--mute);font:14px 'Inter',sans-serif;display:flex;gap:16px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 22px}
+.chips a{font:13px 'Inter',sans-serif;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none}
+.chips a:hover{border-color:var(--accent);color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;margin:18px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 14px;font-size:24px;display:flex;gap:12px;align-items:baseline}
+.card h2 span{font:600 13px 'Inter',sans-serif;color:var(--accent)}
+.card.intro p:first-of-type:first-letter{float:left;font-size:3.6em;line-height:.85;padding:6px 10px 0 0;color:var(--accent);font-weight:600}
+.card h3,.card h4{margin:22px 0 6px;font-size:19px}
+p{margin:0 0 1em}a{color:var(--accent)}
+.card ul,.card ol{padding-left:1.3em}
+.card img{max-width:100%;height:auto;border-radius:10px}
+figure,.thumb{margin:16px 0;padding:0;width:auto!important;float:none!important}
+.thumbcaption,figcaption{font:13px/1.5 'Inter',sans-serif;color:var(--mute);margin-top:6px}
+table{max-width:100%;display:block;overflow-x:auto;font:14px 'Inter',sans-serif;border-collapse:collapse}td,th{border:1px solid var(--line);padding:6px 10px}
+.card .math,.card .mwe-math-element{overflow-x:auto}
+.more{text-align:center;margin:40px 0}
+.more p{color:var(--mute);font:15px 'Inter',sans-serif}
+.state{text-align:center;color:var(--mute);padding:90px 0;font:16px 'Inter',sans-serif}
+.spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 16px;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.fade{animation:f .5s ease both}@keyframes f{from{opacity:0;transform:translateY(8px)}}
+@media(max-width:600px){body{font-size:17px}.card{padding:20px}.logo span{display:none}.hero{margin:20px 0 0}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<header class="ui"><div class="hin">
+  <div class="logo" onclick="randomArticle()">📖 <span>Wander<b>pedia</b></span></div>
+  <div class="sw"><input id="q" placeholder="Search any topic…" autocomplete="off"><div id="sug"></div></div>
+  <button onclick="randomArticle()">🎲 Surprise me</button>
+</div></header>
+<main id="app"></main>
+
+<script>
+const API='https://en.wikipedia.org/w/api.php';
+const SKIP=/^(references|external links|see also|notes|further reading|bibliography|sources|citations|footnotes|footnotes and references|general references)$/i;
+const $=s=>document.querySelector(s);
+const app=$('#app');
+let token=0;
+
+async function api(p){
+  const r=await fetch(API+'?'+new URLSearchParams({format:'json',formatversion:'2',origin:'*',...p}));
+  if(!r.ok)throw new Error('Network error');return r.json();
+}
+const loading=m=>app.innerHTML=`<div class="state"><div class="spin"></div>${m}</div>`;
+
+async function randomArticle(){
+  const my=++token;loading('Finding something worth knowing…');
+  for(let i=0;i<8;i++){
+    try{
+      const j=await api({action:'query',list:'random',rnnamespace:0,rnlimit:1});
+      const ok=await load(j.query.random[0].title,true,my);
+      if(ok||my!==token)return;
+    }catch(e){return fail(e)}
+  }
+  fail(new Error('Could not find a good article. Try again.'));
+}
+function fail(e){app.innerHTML=`<div class="state">Something went wrong: ${e.message}<br><br><button onclick="randomArticle()">Try another</button></div>`}
+
+function openTitle(t){const my=++token;loading('Opening “'+t+'”…');load(t,false,my).then(ok=>{if(!ok&&my===token)fail(new Error('Article not found'))}).catch(fail)}
+
+async function load(title,needLong,my){
+  const [p,s]=await Promise.all([
+    api({action:'parse',page:title,prop:'text|displaytitle',redirects:1,disableeditsection:1,disabletoc:1}),
+    fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title.replace(/ /g,'_'))).then(r=>r.ok?r.json():{}).catch(()=>({}))
+  ]);
+  if(my!==token)return true;
+  if(!p.parse)return false;
+  const secs=build(p.parse.text);
+  const words=secs.reduce((n,x)=>n+x.words,0);
+  if(needLong&&(words<500||secs.length<2||/disambiguation/i.test(s.description||'')||/may refer to/i.test(s.extract||'')))return false;
+  render(p.parse.title,s,secs,words);return true;
+}
+
+function build(html){
+  const d=new DOMParser().parseFromString(html,'text/html');
+  d.querySelectorAll('.infobox,.navbox,.sidebar,.hatnote,.mw-editsection,sup.reference,.reflist,.refbegin,.ambox,.metadata,.noprint,style,.mw-empty-elt,.shortdescription,.toc,.navbox-styles,.sistersitebox,.stub,.mw-cite-backlink,.portal,.side-box').forEach(e=>e.remove());
+  d.querySelectorAll('a').forEach(a=>{
+    const h=a.getAttribute('href')||'';
+    if(/^\/wiki\/(File|Special|Help|Category|Template|Wikipedia|Portal|Talk):/i.test(h)||h.startsWith('#cite')){
+      if(a.querySelector('img')){a.replaceWith(...a.childNodes)}else a.replaceWith(...a.childNodes);
+    }else if(h.startsWith('/wiki/')){a.dataset.t=decodeURIComponent(h.slice(6).split('#')[0]);a.removeAttribute('href');a.style.cursor='pointer'}
+    else if(h.startsWith('//')||h.startsWith('http')){a.target='_blank';a.rel='noopener'}
+    else if(h.startsWith('#')){a.replaceWith(...a.childNodes)}
+  });
+  d.querySelectorAll('img').forEach(i=>{const s=i.getAttribute('src')||'';if(s.startsWith('//'))i.src='https:'+s;i.removeAttribute('srcset');i.loading='lazy'});
+  const root=d.querySelector('.mw-parser-output')||d.body;
+  const secs=[{title:'Overview',nodes:[]}];
+  for(const el of [...root.children]){
+    const h=/^H2$/.test(el.tagName)?el:el.querySelector&&el.querySelector(':scope > h2');
+    if(h){secs.push({title:h.textContent.trim(),nodes:[]});continue}
+    secs[secs.length-1].nodes.push(el);
+  }
+  return secs.filter(x=>!SKIP.test(x.title)).map(x=>{
+    const box=document.createElement('div');x.nodes.forEach(n=>box.appendChild(document.importNode(n,true)));
+    box.querySelectorAll('p:empty').forEach(e=>e.remove());
+    const words=(box.textContent.match(/\S+/g)||[]).length;
+    return {title:x.title,el:box,words};
+  }).filter(x=>x.words>25);
+}
+
+function render(title,s,secs,words){
+  const mins=Math.max(1,Math.round(words/230));
+  const img=s.originalimage?.source||s.thumbnail?.source;
+  const url='https://en.wikipedia.org/wiki/'+encodeURIComponent(title.replace(/ /g,'_'));
+  app.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='fade';
+  wrap.innerHTML=`
+  <div class="hero">${img?`<img src="${img}" alt="">`:''}<div>
+    <div class="kick ui">Now reading</div><h1>${esc(title)}</h1>
+    ${s.description?`<p class="desc">${esc(s.description)}</p>`:''}</div></div>
+  <div class="meta ui"><span>⏱ ${mins} min read</span><span>📑 ${secs.length} sections</span><a href="${url}" target="_blank" rel="noopener">Open on Wikipedia ↗</a></div>
+  <div class="chips ui">${secs.slice(1).map((x,i)=>`<a href="#s${i+1}">${esc(x.title)}</a>`).join('')}</div>`;
+  secs.forEach((x,i)=>{
+    const c=document.createElement('section');c.className='card'+(i?'':' intro');c.id='s'+i;
+    c.innerHTML=`<h2>${i?`<span class="ui">${String(i).padStart(2,'0')}</span>`:''}${esc(x.title)}</h2>`;
+    c.appendChild(x.el);wrap.appendChild(c);
+  });
+  const more=document.createElement('div');more.className='more ui';
+  more.innerHTML=`<p>You just learned something new. Keep going?</p><button onclick="randomArticle()">🎲 Another random topic</button>`;
+  wrap.appendChild(more);app.appendChild(wrap);
+  wrap.addEventListener('click',e=>{const a=e.target.closest('a[data-t]');if(a){e.preventDefault();go(a.dataset.t)}});
+  document.title=title+' – Wanderpedia';
+  try{history.replaceState(null,'','#'+encodeURIComponent(title))}catch(e){}
+  window.scrollTo(0,0);
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function go(t){location.hash=encodeURIComponent(t)}
+window.addEventListener('hashchange',()=>{const t=decodeURIComponent(location.hash.slice(1));if(t&&t!==document.title.replace(' – Wanderpedia',''))openTitle(t)});
+
+// progress bar
+addEventListener('scroll',()=>{const h=document.documentElement;$('#bar').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight||1)*100)+'%'},{passive:true});
+
+// search
+const q=$('#q'),sug=$('#sug');let timer;
+q.addEventListener('input',()=>{
+  clearTimeout(timer);const v=q.value.trim();
+  if(!v){sug.style.display='none';return}
+  timer=setTimeout(async()=>{
+    try{
+      const j=await api({action:'query',list:'search',srsearch:v,srlimit:7,srnamespace:0});
+      const r=j.query.search;
+      sug.innerHTML=r.length?r.map(x=>`<a data-t="${esc(x.title)}">${esc(x.title)}<small>${x.snippet.replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').slice(0,110)}…</small></a>`).join(''):'<a>No results</a>';
+      sug.style.display='block';
+    }catch(e){}
+  },250);
+});
+q.addEventListener('keydown',e=>{if(e.key==='Enter'){const a=sug.querySelector('a[data-t]');if(a)pick(a.dataset.t)}});
+sug.addEventListener('click',e=>{const a=e.target.closest('a[data-t]');if(a)pick(a.dataset.t)});
+function pick(t){sug.style.display='none';q.value='';q.blur();go(t)}
+document.addEventListener('click',e=>{if(!e.target.closest('.sw'))sug.style.display='none'});
+
+// start
+const start=decodeURIComponent(location.hash.slice(1));
+start?openTitle(start):randomArticle();
+</script>
+</body>
+</html>
